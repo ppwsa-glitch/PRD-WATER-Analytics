@@ -123,7 +123,16 @@ $('kpis').innerHTML=tile('Treated turbidity',fmt(t,3),'Criteria ≤ 1 · workboo
 let labels=r.map(x=>x.date.slice(5));const tk={color:'#7897b0'},gx={color:'#ffffff0a'};chart('qualityChart','line',labels,[{label:'Treated turbidity (NTU) · right axis',data:r.map(x=>x.treatedTurb),color:COLORS[0],fill:true,yAxisID:'y1'},{label:'Treated pH · left axis',data:r.map(x=>x.treatedPH),color:COLORS[1],yAxisID:'y'}],{scales:{x:{ticks:{...tk,maxRotation:0,autoSkip:true},grid:gx},y:{type:'linear',position:'left',title:{display:true,text:'pH',color:'#9bb6cb'},ticks:tk,grid:{color:'#ffffff0c'}},y1:{type:'linear',position:'right',beginAtZero:true,title:{display:true,text:'Turbidity (NTU)',color:'#9bb6cb'},ticks:tk,grid:{drawOnChartArea:false}}}});
 chart('radarChart','radar',['Turbidity','pH','FAC'],[{label:'Average',data:[t,p,f],color:COLORS[0],fill:true}],{scales:{r:{angleLines:{color:'#ffffff18'},grid:{color:'#ffffff18'},pointLabels:{color:'#a8c1d4'},ticks:{display:false}}}});
 let mlabels=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];let by=(k,m)=>avg(r.filter(x=>x.month===m).map(x=>x[k]));
-chart('monthlyChart','bar',mlabels,[{label:'Treated turbidity',data:mlabels.map((_,i)=>by('treatedTurb',i+1)),color:COLORS[0]},{label:'Treated pH',data:mlabels.map((_,i)=>by('treatedPH',i+1)),color:COLORS[1]}]);
+chart('monthlyChart','bar',mlabels,[
+  {label:'Treated turbidity (NTU)',data:mlabels.map((_,i)=>by('treatedTurb',i+1)),color:COLORS[0],yAxisID:'y'},
+  {label:'Treated pH',data:mlabels.map((_,i)=>by('treatedPH',i+1)),color:COLORS[1],type:'line',yAxisID:'y1'}
+],{
+  scales:{
+    x:{ticks:{color:'#7897b0',maxRotation:0,autoSkip:true},grid:{color:'#ffffff0a'}},
+    y:{type:'linear',position:'left',title:{display:true,text:'Turbidity (NTU)',color:'#7897b0'},ticks:{color:'#7897b0'},grid:{color:'#ffffff0c'}},
+    y1:{type:'linear',position:'right',title:{display:true,text:'pH',color:'#7897b0'},ticks:{color:'#7897b0'},grid:{drawOnChartArea:false}}
+  }
+});
 $('compliance').innerHTML=`<table><thead><tr><th>Parameter</th><th>Average</th><th>Criteria</th><th>Status</th></tr></thead><tbody><tr><td>Treated turbidity</td><td>${fmt(t,3)}</td><td>≤ 1</td><td>${status(t,0,1)}</td></tr><tr><td>Treated pH</td><td>${fmt(p)}</td><td>7.3–8.5</td><td>${status(p,7.3,8.5)}</td></tr><tr><td>Treated FAC</td><td>${fmt(f)}</td><td>0.9–1.5</td><td>${status(f,.9,1.5)}</td></tr></tbody></table>`;
 }
 function renderWater(){let r=rows(),keys=[['rawTurb','treatedTurb'],['rawPH','treatedPH'],['rawFAC','treatedFAC']];let av=k=>avg(r.map(x=>x[k]));$('waterKpis').innerHTML=tile('Raw turbidity',fmt(av('rawTurb'),2),'Raw water','◉')+tile('Treated turbidity',fmt(av('treatedTurb'),3),'Treated water','◉')+tile('Raw pH',fmt(av('rawPH')),'Raw water','⌁')+tile('Treated pH',fmt(av('treatedPH')),'Treated water','⌁');
