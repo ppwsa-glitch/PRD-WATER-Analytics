@@ -298,52 +298,183 @@ renderAll();
  loadCriteria();renderAll();
 })();
 </script>
-</body></html>
+
 <script>
-/* Demo Patch: បើកដំណើរការបង្ហាញទិន្ន័យរោងចក្រទាំង ៩ ដែលមានស្រាប់ក្នុង DATA.daily */
-(function() {
-  // ១. ធ្វើបច្ចុប្បន្នភាពស្ថានភាពរោងចក្រទាំង ៩ ក្នុង Plant Network
-  PLANTS.forEach(p => {
-    const count = DATA.daily.filter(x => (x.plant || 'BKG') === p.code).length;
-    p.hasData = count > 0;
+/* PRD-WATER V2.1 Complete Multi-Plant Patch */
+(function(){
+  // 1. Ensure every record has explicit plant code
+  DATA.daily.forEach(x => { if (!x.plant) x.plant = 'BKG'; });
+
+  // Helper to get available years and counts per plant
+  function getPlantStats(code) {
+    const recs = code === 'ALL' ? DATA.daily : DATA.daily.filter(x => x.plant === code);
+    const years = [...new Set(recs.map(x => x.year))].sort((a,b) => b - a);
+    const hasRaw = recs.some(x => x.rawTurb !== null || x.rawPH !== null);
+    return { count: recs.length, years, hasRaw };
+  }
+
+  // 2. Smart year auto-switching when selecting a plant that has no data in the currently chosen year (e.g. 2026)
+  function ensureValidYearForPlant(code) {
+    if (code === 'ALL') return;
+    const currentYear = +$('year').value;
+    const hasInCurrentYear = DATA.daily.some(x => x.plant === code && x.year === currentYear);
+    if (!hasInCurrentYear) {
+      const stats = getPlantStats(code);
+      if (stats.years.length > 0) {
+        $('year').value = String(stats.years[0]); // Automatically switch to latest available year (e.g., 2025)
+      }
+    }
+  }
+
+  // Hook into plantSelect dropdown and selectPlant() card clicks
+  const origSelectPlant = window.selectPlant;
+  window.selectPlant = function(code) {
+    ensureValidYearForPlant(code);
+    origSelectPlant(code);
+  };
+
+  // Replace plantSelect listener so it auto-switches year before rendering
+  const oldSel = $('plantSelect');
+  const newSel = oldSel.cloneNode(true);
+  oldSel.parentNode.replaceChild(newSel, oldSel);
+  newSel.addEventListener('change', () => {
+    currentPlant = newSel.value;
+    ensureValidYearForPlant(currentPlant);
+    document.querySelector('.eyebrow').textContent = currentPlant === 'ALL'
+      ? 'PRD-WATER / ALL WATER TREATMENT PLANTS'
+      : 'PRD-WATER / ' + currentPlant + ' WATER TREATMENT PLANT';
+    renderAll();
   });
 
-  // ២. កែសម្រួលផ្ទាំង Water Quality Monitoring ឱ្យបង្ហាញក្រាហ្វិកទឹកស្អាតសម្រាប់គ្រប់រោងចក្រ
-  const origRenderWater = renderWater;
-  renderWater = function() {
-    origRenderWater();
+  // 3. Enhanced Overview: accurate status banner + Multi-Plant Comparison table when ALL is selected
+  const prevRenderOverview = renderOverview;
+  renderOverview = function() {
+    prevRenderOverview();
     const r = rows();
-    const labels = r.map(x => x.date.slice(5));
+    const y = +$('year').value;
+    const note = $('overviewDataNote');
+    const plantsInYear = [...new Set(DATA.daily.filter(x => x.year === y).map(x => x.plant))];
     const hasRaw = r.some(x => x.rawTurb !== null || x.rawPH !== null);
-    const tk2 = { color: '#7897b0' };
 
-    // បើគ្មានទិន្ន័យទឹកឆៅ (រោងចក្រក្រៅពី BKG) ឱ្យបង្ហាញតែខ្សែក្រាហ្វិកទឹកស្អាត
+    if (note) {
+      if (currentPlant === 'ALL') {
+        note.innerHTML = `<strong>All Plants (${plantsInYear.length}/9 active in ${y}):</strong> ទិន្ន័យប្រចាំថ្ងៃត្រូវបានគណនាជាមធ្យមភាគរួមពីរោងចក្រដែលមានទិន្ន័យក្នុងឆ្នាំ ${y} (${plantsInYear.join(', ')})។ សូមជ្រើសរើសរោងចក្រនីមួយៗខាងលើដើម្បីមើលទិន្ន័យលម្អិត។`;
+      } else if (!hasRaw && r.length > 0) {
+        note.innerHTML = `<strong>${currentPlant} WTP (ឆ្នាំ ${y}):</strong> កំពុងបង្ហាញទិន្ន័យគុណភាពទឹកស្អាត (Treated Turbidity, pH, FAC) ចំនួន <b>${r.length}</b> កំណត់ត្រា ពីឯកសារ <code>KPI_WQ_2024-2025.xls</code>។ <i>(ទិន្ន័យទឹកឆៅ និងការប្រើប្រាស់ថ្នាំគីមីមិនទាន់មានសម្រាប់រោងចក្រនេះទេ)</i>`;
+      } else if (r.length === 0) {
+        const stats = getPlantStats(currentPlant);
+        note.innerHTML = `<strong>${currentPlant} WTP:</strong> មិនមានទិន្ន័យសម្រាប់ឆ្នាំ ${y} ទេ។ ឆ្នាំដែលមានទិន្ន័យ៖ <b>${stats.years.join(', ') || 'គ្មាន'}</b>។`;
+      }
+    }
+
+    // Inject or update Multi-Plant Comparison Card on Overview when ALL is selected
+    let compCard = document.getElementById('multiPlantSummaryCard');
+    if (!compCard) {
+      compCard = document.createElement('div');
+      compCard.id = 'multiPlantSummaryCard';
+      compCard.className = 'card';
+      compCard.style.marginTop = '16px';
+      const exCard = $('exceptionTable').closest('.card');
+      exCard.parentNode.insertBefore(compCard, exCard);
+    }
+
+    if (currentPlant === 'ALL') {
+      compCard.style.display = 'block';
+      const m = +$('month').value;
+      const rowsHtml = PLANTS.map(p => {
+        const pr = DATA.daily.filter(x => x.plant === p.code && x.year === y && (!m || x.month === m));
+        const t = avg(pr.map(x => x.treatedTurb));
+        const ph = avg(pr.map(x => x.treatedPH));
+        const fac = avg(pr.map(x => x.treatedFAC));
+        const rawT = avg(pr.map(x => x.rawTurb));
+        const scopeTag = p.code === 'BKG'
+          ? '<span class="status">Full (Raw + Treated + Chem)</span>'
+          : (pr.length ? '<span class="status warn">Treated KPI Only</span>' : '<span class="status bad">No data in ' + y + '</span>');
+        return `<tr style="cursor:pointer" onclick="selectPlant('${p.code}')">
+          <td><b>${p.code}</b> · ${p.name}</td>
+          <td>${pr.length}</td>
+          <td>${fmt(rawT, 2)}</td>
+          <td>${fmt(t, 3)}</td>
+          <td>${fmt(ph, 2)}</td>
+          <td>${fmt(fac, 2)}</td>
+          <td>${scopeTag}</td>
+        </tr>`;
+      }).join('');
+
+      compCard.innerHTML = `
+        <div class="cardtitle">Multi-Plant Performance Comparison (${y}${m ? ' · Month ' + m : ''})</div>
+        <div class="carddesc">ចុចលើជួររោងចក្រណាមួយដើម្បីបើកមើលទិន្ន័យលម្អិតរបស់រោងចក្រនោះ</div>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Plant · រោងចក្រ</th>
+                <th>Days</th>
+                <th>Raw Turb. (NTU)</th>
+                <th>Treated Turb. (NTU)</th>
+                <th>Treated pH</th>
+                <th>Treated FAC (mg/L)</th>
+                <th>Data Scope</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>`;
+    } else {
+      compCard.style.display = 'none';
+    }
+  };
+
+  // 4. Enhanced Water Quality Charts: cleanly render Treated-only charts when Raw Water is unavailable
+  const prevRenderWater = renderWater;
+  renderWater = function() {
+    prevRenderWater();
+    const r = rows();
+    const hasRaw = r.some(x => x.rawTurb !== null || x.rawPH !== null);
     if (!hasRaw && currentPlant !== 'ALL') {
+      const av = k => avg(r.map(x => x[k]));
+      $('waterKpis').innerHTML =
+        tile('Raw turbidity', '—', 'Not available in KPI file', '◉') +
+        tile('Treated turbidity', fmt(av('treatedTurb'), 3), 'Treated water (KPI)', '◉', av('treatedTurb') !== null && av('treatedTurb') <= 1 ? 'positive' : 'warning') +
+        tile('Raw pH', '—', 'Not available in KPI file', '⌁') +
+        tile('Treated pH', fmt(av('treatedPH')), 'Treated water (KPI)', '⌁', av('treatedPH') !== null && av('treatedPH') >= 7.3 && av('treatedPH') <= 8.5 ? 'positive' : 'warning');
+
+      const labels = r.map(x => x.date.slice(5));
       chart('turbChart', 'line', labels, [
         { label: 'Treated turbidity (NTU)', data: r.map(x => x.treatedTurb), color: COLORS[0], fill: true }
       ]);
       chart('phChart', 'line', labels, [
-        { label: 'Treated pH', data: r.map(x => x.treatedPH), color: COLORS[0], fill: true }
+        { label: 'Treated pH', data: r.map(x => x.treatedPH), color: COLORS[1], fill: true }
       ]);
       chart('facChart', 'line', labels, [
-        { label: 'Treated FAC (mg/L)', data: r.map(x => x.treatedFAC), color: COLORS[0], fill: true }
+        { label: 'Treated FAC (mg/L)', data: r.map(x => x.treatedFAC), color: COLORS[2], fill: true }
       ]);
     }
   };
 
-  // ៣. បង្ហាញសារជូនដំណឹងច្បាស់លាស់នៅផ្ទាំង Overview និង Chemical
-  const origRenderAll = renderAll;
-  renderAll = function() {
-    origRenderAll();
-    const r = rows();
-    const hasRaw = r.some(x => x.rawTurb !== null || x.rawPH !== null);
-    const note = $('overviewDataNote');
-    if (note && currentPlant !== 'ALL' && !hasRaw) {
-      note.innerHTML = `<strong>${currentPlant} WTP:</strong> កំពុងបង្ហាញទិន្ន័យគុណភាពទឹកស្អាត (pH, Turbidity, FAC) ចំនួន <b>${r.length}</b> ថ្ងៃពីឯកសារ KPI_WQ_2024-2025.xls។ <i>(ទិន្ន័យទឹកឆៅ និងសារធាតុគីមីមិនទាន់មានសម្រាប់រោងចក្រនេះទេ)</i>`;
-    }
+  // 5. Enhanced Plant Network Cards: show exact years & record counts for all 9 plants
+  renderPlantCards = function() {
+    const host = $('plantCards');
+    if (!host) return;
+    host.innerHTML = '<div class="card" style="grid-column:1/-1"><div class="cardtitle">Network distribution</div><div class="sub" style="margin-top:8px">6 plants · រាជធានីភ្នំពេញ &nbsp; | &nbsp; 3 plants · ខេត្ត &nbsp; | &nbsp; 9/9 plants connected with historical data</div></div>' +
+      PLANTS.map(p => {
+        const stats = getPlantStats(p.code);
+        const yrText = stats.years.length ? `${Math.min(...stats.years)}–${Math.max(...stats.years)} (${stats.count} days)` : 'No records';
+        const badge = stats.hasRaw
+          ? `<span class="status">Full Data · ${yrText}</span>`
+          : `<span class="status warn">Treated KPI · ${yrText}</span>`;
+        return `<div class="card" style="cursor:pointer" onclick="selectPlant('${p.code}')">
+          <div class="kpihead"><span>${p.region}</span><span class="glyph">⌁</span></div>
+          <div class="value" style="font-size:25px">${p.code} WTP</div>
+          <div class="sub" style="font-size:14px;margin:7px 0 12px">${p.name}</div>
+          ${badge}
+        </div>`;
+      }).join('');
   };
 
-  // ដំណើរការផ្ទាំង Dashboard ឡើងវិញភ្លាមៗ
+  // Initialize immediately
   renderAll();
 })();
 </script>
+
+</body></html>
