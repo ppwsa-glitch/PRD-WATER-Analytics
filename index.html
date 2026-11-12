@@ -1,408 +1,561 @@
 <!DOCTYPE html>
 <html lang="km">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PRD Operations - Premium Mobile Console</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Kantumruy Pro', sans-serif;
-      overscroll-behavior-x: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-    /* បែបផែនកញ្ចក់ Premium Glassmorphism */
-    .glass-sidebar {
-      background: rgba(255, 255, 255, 0.90);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-    }
-    /* Animation សម្រាប់ប្តូរទំព័រ */
-    .fade-in {
-      animation: fadeIn 0.25s ease-out forwards;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRD-WATER / SKY GLASS V2 PREMIUM</title>
+<style>
+/* ================= PREMIUM GLASS SIDEBAR & LAYOUT (DESKTOP & MOBILE) ================= */
+:root {
+  --cyan: #38d8ee;
+  --blue: #1687ed;
+  --dark-bg: #031938;
+  --panel-bg: rgba(12, 74, 129, 0.58);
+  --line: rgba(228, 247, 255, 0.32);
+  --muted: #9bb6cb;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Khmer OS Battambang', system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at top left, #082d58 0%, #03142b 60%, #010a18 100%);
+  color: #e8f4ff;
+  min-height: 100vh;
+}
+.app {
+  display: grid;
+  grid-template-columns: 272px 1fr;
+  min-height: 100vh;
+  transition: grid-template-columns 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.app.collapsed {
+  grid-template-columns: 84px 1fr;
+}
+
+/* Sidebar Container */
+.side {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(175deg, rgba(6, 44, 88, 0.72) 0%, rgba(3, 25, 56, 0.82) 100%);
+  border-right: 1px solid rgba(190, 240, 255, 0.25);
+  backdrop-filter: blur(28px) saturate(165%);
+  -webkit-backdrop-filter: blur(28px) saturate(165%);
+  box-shadow: 10px 0 40px rgba(0, 24, 64, 0.28), inset -1px 0 0 rgba(255, 255, 255, 0.14);
+  z-index: 1000;
+  overflow-x: hidden;
+  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Brand & Desktop Collapse Button */
+.side-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 6px 20px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.logo {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #a8f5ff 0%, #2499ff 55%, #0b5ed7 100%);
+  color: #032b59;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 20px;
+  box-shadow: 0 6px 20px rgba(56, 216, 238, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.7);
+}
+.brand-text {
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.25s ease;
+}
+.brand-text b { display: block; font-size: 15px; color: #fff; letter-spacing: 0.05em; }
+.brand-text small { display: block; color: #b7ebff; font-size: 9px; letter-spacing: 0.17em; margin-top: 3px; }
+
+.side-toggle-btn {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  border: 1px solid rgba(200, 242, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #bfefff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  transition: 0.2s;
+}
+.side-toggle-btn:hover {
+  background: rgba(140, 236, 255, 0.22);
+  color: #fff;
+  border-color: #8cecff;
+}
+
+/* Navigation Links */
+.navlabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: #8cc4eb;
+  margin: 10px 10px 8px;
+  white-space: nowrap;
+}
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.nav::-webkit-scrollbar { width: 4px; }
+.nav::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 10px; }
+
+.nav button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 13px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #d6ecff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+.nav button .nav-icon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: #8cecff;
+  font-size: 15px;
+  transition: 0.25s;
+}
+.nav button:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(180, 238, 255, 0.22);
+  transform: translateX(3px);
+}
+.nav button.active {
+  color: #fff;
+  font-weight: 600;
+  background: linear-gradient(105deg, rgba(66, 185, 255, 0.42), rgba(20, 108, 214, 0.34));
+  border-color: rgba(185, 244, 255, 0.48);
+  box-shadow: 0 8px 24px rgba(0, 32, 74, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.nav button.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 22%;
+  bottom: 22%;
+  width: 3.5px;
+  border-radius: 0 4px 4px 0;
+  background: #8cf3ff;
+  box-shadow: 0 0 12px #8cf3ff;
+}
+.nav button.active .nav-icon {
+  background: linear-gradient(135deg, #8cecff, #2a93f5);
+  color: #032d5e;
+  box-shadow: 0 3px 12px rgba(95, 224, 255, 0.45);
+}
+
+/* Desktop Collapsed State */
+.app.collapsed .brand-text,
+.app.collapsed .navlabel,
+.app.collapsed .nav-text,
+.app.collapsed .sidefoot-card {
+  display: none !important;
+}
+.app.collapsed .side-header {
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+}
+.app.collapsed .nav button {
+  justify-content: center;
+  padding: 11px 0;
+}
+.app.collapsed .nav button:hover {
+  transform: none;
+}
+
+/* Footer Status Card */
+.sidefoot {
+  margin-top: auto;
+  padding-top: 14px;
+}
+.sidefoot-card {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(205, 244, 255, 0.2);
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 11px;
+  color: #cbe7ff;
+  line-height: 1.5;
+}
+.live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #7efce0;
+  margin-bottom: 4px;
+}
+.live-pill i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #39e6cf;
+  box-shadow: 0 0 10px #39e6cf;
+}
+
+/* Mobile Header & Backdrop */
+.mobile-topbar { display: none; }
+.side-backdrop { display: none; }
+
+/* Main Content Area Styling */
+main {
+  padding: 28px clamp(18px, 3vw, 42px) 48px;
+  max-width: 1700px;
+  width: 100%;
+  margin: auto;
+}
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 27px;
+}
+.eyebrow { color: var(--cyan); font-size: 10px; letter-spacing: 0.2em; font-weight: 700; text-shadow: 0 1px 12px #00559a; }
+.top h1 { font-size: clamp(22px, 3vw, 30px); margin: 6px 0 0; letter-spacing: -0.04em; color: #fff; text-shadow: 0 2px 18px rgba(0,38,89,.48); }
+.controls { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; }
+.select, .action {
+  background: linear-gradient(145deg, rgba(16,79,137,.65), rgba(8,48,96,.65));
+  border: 1px solid rgba(200,238,255,.32);
+  color: #e5f4ff;
+  padding: 9px 14px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: 0.2s;
+}
+.select:hover, .action:hover { border-color: var(--cyan); background: rgba(22,115,200,.6); }
+.action { background: linear-gradient(135deg, #1687ed, #0a5ec2); font-weight: 600; border: 1px solid rgba(255,255,255,.3); }
+.action:hover { background: linear-gradient(135deg, #2499ff, #116edb); }
+
+/* Dashboard Cards & Grid Elements */
+.grid { display: grid; gap: 16px; margin-bottom: 16px; }
+.grid.kpis { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.grid.charts { grid-template-columns: 2fr 1.2fr; }
+.grid.charts.equal { grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); }
+.grid.bottom { grid-template-columns: 1.2fr 2fr; }
+.card {
+  background: linear-gradient(145deg, rgba(12, 74, 129, 0.58), rgba(5, 43, 91, 0.52));
+  border: 1px solid rgba(228, 247, 255, 0.32);
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+  box-shadow: 0 16px 42px rgba(0, 35, 86, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 20px;
+  transition: 0.25s;
+}
+.card:hover { border-color: rgba(172, 239, 255, 0.72); box-shadow: 0 20px 48px rgba(0, 35, 86, 0.3), 0 0 0 1px rgba(164, 235, 255, 0.14); }
+.kpihead { display: flex; justify-content: space-between; align-items: center; color: #a1c8ec; font-size: 12px; font-weight: 600; }
+.glyph { font-size: 17px; color: var(--cyan); }
+.value { font-size: 28px; font-weight: 700; color: #fff; margin: 10px 0 4px; text-shadow: 0 2px 10px rgba(0,40,90,.4); }
+.sub { font-size: 12px; color: #9bb7cc; }
+.cardtitle { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.carddesc { font-size: 12px; color: #9ab9d0; margin-bottom: 14px; }
+.chartbox { position: relative; height: 280px; width: 100%; }
+.section { display: none; }
+.section.active { display: block; }
+.note { background: rgba(8, 48, 92, 0.45); border: 1px solid rgba(170, 230, 255, 0.22); padding: 12px 16px; border-radius: 12px; font-size: 12px; color: #c4e4ff; line-height: 1.5; margin-bottom: 16px; }
+.tablewrap { width: 100%; overflow-x: auto; max-height: 380px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+th, td { padding: 10px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+th { color: var(--cyan); font-weight: 600; background: rgba(5, 38, 77, 0.6); position: sticky; top: 0; }
+.status { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: rgba(57, 214, 187, 0.18); color: #39d6bb; border: 1px solid rgba(57, 214, 187, 0.35); }
+.status.warn { background: rgba(255, 198, 110, 0.18); color: #ffc66e; border-color: rgba(255, 198, 110, 0.35); }
+.status.bad { background: rgba(255, 107, 107, 0.18); color: #ff6b6b; border-color: rgba(255, 107, 107, 0.35); }
+
+/* ================= MOBILE RESPONSIVE (PREMIUM DRAWER) ================= */
+@media (max-width: 860px) {
+  .app, .app.collapsed { display: block !important; }
+  .side-toggle-btn { display: none; }
+
+  .mobile-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(5, 40, 82, 0.72);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    border-bottom: 1px solid rgba(215, 245, 255, 0.24);
+    box-shadow: 0 6px 24px rgba(0, 24, 62, 0.25);
+  }
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #fff;
+  }
+  .mobile-brand .logo { width: 34px; height: 34px; border-radius: 10px; font-size: 17px; }
+  .hamburger-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 13px;
+    border-radius: 11px;
+    border: 1px solid rgba(190, 242, 255, 0.35);
+    background: linear-gradient(135deg, rgba(72, 184, 255, 0.32), rgba(16, 94, 196, 0.32));
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 30, 70, 0.25);
+  }
+
+  .side {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px !important;
+    height: 100dvh !important;
+    padding: 20px 16px !important;
+    transform: translateX(-105%);
+    z-index: 1100;
+    border-right: 1px solid rgba(215, 245, 255, 0.32) !important;
+    background: linear-gradient(175deg, rgba(6, 46, 94, 0.88), rgba(3, 24, 54, 0.94)) !important;
+  }
+  .side.open { transform: translateX(0); }
+  .side.open .brand-text,
+  .side.open .navlabel,
+  .side.open .nav-text,
+  .side.open .sidefoot-card { display: block !important; }
+  .side.open .nav { flex-direction: column !important; overflow-y: auto !important; }
+  .side.open .nav button { width: 100% !important; justify-content: flex-start !important; padding: 12px 13px !important; font-size: 14px !important; }
+
+  .side-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 16, 38, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 1050;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    display: block;
+  }
+  .side-backdrop.show { opacity: 1; pointer-events: auto; }
+  .grid.charts, .grid.bottom { grid-template-columns: 1fr; }
+}
+</style>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 min-h-screen text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
+<body>
 
-  <!-- Top Navbar -->
-  <header class="sticky top-0 z-30 flex items-center justify-between px-4 py-3.5 bg-white/80 backdrop-blur-lg border-b border-white/60 shadow-xs">
-    <div class="flex items-center gap-3">
-      <button id="openSidebar" aria-label="បើកម៉ឺនុយ" class="p-2.5 rounded-2xl bg-white shadow-xs border border-slate-200/70 hover:bg-slate-50 active:scale-95 transition-all text-slate-700">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6h16M4 12h11M4 18h16"/>
-        </svg>
-      </button>
+<div class="app">
+  <!-- Mobile Sticky Header -->
+  <div class="mobile-topbar">
+    <div class="mobile-brand">
+      <div class="logo">≈</div>
       <div>
-        <span id="headerTitle" class="font-bold text-base tracking-tight text-slate-800 block leading-none">ផ្ទាំងគ្រប់គ្រង (Dashboard)</span>
-        <span class="text-[11px] text-indigo-600 font-medium">រដ្ឋាករទឹកស្វយ័តក្រុងភ្នំពេញ</span>
+        <div>PRD-WATER</div>
+        <div style="font-size:9px;color:#b7e5ff;letter-spacing:.14em;font-weight:500">SKY GLASS V2</div>
       </div>
     </div>
-    
-    <!-- Profile Avatar -->
-    <div class="flex items-center gap-2">
-      <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-cyan-500 p-0.5 shadow-sm">
-        <div class="w-full h-full bg-white rounded-full flex items-center justify-center font-bold text-xs text-indigo-600">
-          SC
+    <button class="hamburger-btn" id="mobileMenuBtn" aria-label="Open menu">☰ ម៉ឺនុយ</button>
+  </div>
+
+  <!-- Mobile Backdrop -->
+  <div class="side-backdrop" id="sideBackdrop"></div>
+
+  <!-- Premium Glass Sidebar -->
+  <aside class="side" id="appSidebar">
+    <div class="side-header">
+      <div class="brand">
+        <div class="logo">≈</div>
+        <div class="brand-text">
+          <b>PRD-WATER</b>
+          <small>WATER QUALITY ANALYTICS</small>
         </div>
       </div>
-    </div>
-  </header>
-
-  <!-- Main Content Area -->
-  <main id="mainContent" class="p-4 pb-20 space-y-4 max-w-lg mx-auto">
-    
-    <!-- ទំព័រទី ១៖ Dashboard (Default) -->
-    <section id="page-dashboard" class="page-section fade-in space-y-4">
-      <div class="p-5 rounded-3xl bg-white/85 backdrop-blur-md shadow-sm border border-white">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold mb-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          ប្រព័ន្ធដំណើរការធម្មតា (Online)
-        </div>
-        <h1 class="text-lg font-bold text-slate-800">សួស្តី, សោម ច័ន្ទសំណាង</h1>
-        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-          សូមស្វាគមន៍មកកាន់ប្រព័ន្ធគ្រប់គ្រងការផលិតទឹកស្អាត។ អូសពីគែមខាងឆ្វេង ឬចុចប៊ូតុងខាងលើដើម្បីជ្រើសរើសមុខងារ។
-        </p>
-      </div>
-
-      <!-- Quick Stats Grid -->
-      <div class="grid grid-cols-2 gap-3">
-        <div class="p-4 rounded-3xl bg-white/85 border border-white shadow-xs">
-          <p class="text-xs text-slate-400 font-medium">សម្ពាធទឹកមេ (PSMD)</p>
-          <p class="text-xl font-bold text-indigo-600 mt-1">3.45 <span class="text-xs font-normal text-slate-500">bar</span></p>
-          <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-600 font-semibold">ស្ថិរភាពល្អ</span>
-        </div>
-        <div class="p-4 rounded-3xl bg-white/85 border border-white shadow-xs">
-          <p class="text-xs text-slate-400 font-medium">កិច្ចការត្រូវធ្វើថ្ងៃនេះ</p>
-          <p class="text-xl font-bold text-rose-500 mt-1">03 <span class="text-xs font-normal text-slate-500">កិច្ចការ</span></p>
-          <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-md bg-rose-50 text-rose-600 font-semibold">កំពុងរង់ចាំ</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- ទំព័រផ្សេងៗ (Placeholder សម្រាប់ប្តូរតាមម៉ឺនុយ) -->
-    <section id="page-dynamic" class="page-section hidden fade-in">
-      <div class="p-6 rounded-3xl bg-white/85 backdrop-blur-md shadow-sm border border-white text-center space-y-3">
-        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-          </svg>
-        </div>
-        <h2 id="dynamicPageTitle" class="text-lg font-bold text-slate-800">ចំណងជើងទំព័រ</h2>
-        <p id="dynamicPageDesc" class="text-xs text-slate-500 leading-relaxed">
-          អ្នកអាចដាក់ទម្រង់បញ្ចូលទិន្នន័យ (Form) ឬតារាងទិន្នន័យពី Google Sheets នៅក្នុងផ្នែកនេះ។
-        </p>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- តំបន់ចាប់សញ្ញាអូសនៅគែមខាងឆ្វេង (Edge Swipe Zone) -->
-  <div id="edgeSwipeZone" class="fixed top-0 left-0 z-30 w-6 h-full"></div>
-
-  <!-- Backdrop Overlay -->
-  <div id="sidebarBackdrop" class="fixed inset-0 z-40 bg-slate-900/35 backdrop-blur-xs opacity-0 pointer-events-none transition-opacity duration-300 ease-out"></div>
-
-  <!-- Premium Mobile Sidebar -->
-  <aside id="mobileSidebar" class="fixed top-0 left-0 z-50 h-full w-[295px] glass-sidebar shadow-[0_20px_50px_rgba(8,_112,_184,_0.15)] transform -translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between rounded-r-3xl border-r border-white">
-    
-    <!-- Top Section -->
-    <div>
-      <div class="flex items-center justify-between px-6 pt-6 pb-5 border-b border-slate-200/60">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
-            </svg>
-          </div>
-          <div>
-            <h2 class="font-bold text-slate-800 text-base tracking-wide">PRD OPERATIONS</h2>
-            <span class="text-[11px] text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded-md">រោងចក្រផលិតទឹកស្អាត</span>
-          </div>
-        </div>
-        
-        <button id="closeSidebar" aria-label="បិទម៉ឺនុយ" class="p-2 rounded-xl bg-slate-100/80 hover:bg-slate-200/80 text-slate-500 hover:text-slate-800 active:scale-95 transition-all">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-
-      <!-- Navigation Links -->
-      <nav id="sidebarNav" class="px-4 py-4 space-y-4 overflow-y-auto no-scrollbar max-h-[calc(100vh-195px)]">
-        
-        <!-- ផ្នែកទី ១៖ ទិដ្ឋភាពទូទៅ -->
-        <div>
-          <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">ទិដ្ឋភាពទូទៅ</p>
-          <button data-target="dashboard" data-title="ផ្ទាំងគ្រប់គ្រង (Dashboard)" class="nav-item active-nav w-full flex items-center justify-between px-3.5 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-medium shadow-md shadow-indigo-500/25 transition-all">
-            <div class="flex items-center gap-3">
-              <svg class="w-5 h-5 nav-icon text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-              </svg>
-              <span class="text-sm">ផ្ទាំងគ្រប់គ្រង (Dashboard)</span>
-            </div>
-            <span class="active-dot w-2 h-2 rounded-full bg-white shadow-xs"></span>
-          </button>
-        </div>
-
-        <!-- ផ្នែកទី ២៖ ប្រតិបត្តិការរោងចក្រ -->
-        <div>
-          <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">ប្រតិបត្តិការរោងចក្រ</p>
-          <div class="space-y-1">
-            <!-- PSMD Pressure Console -->
-            <button data-target="psmd" data-title="តាមដានសម្ពាធទឹក (PSMD)" class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-slate-600 hover:text-indigo-600 hover:bg-white/80 transition-all group">
-              <div class="flex items-center gap-3">
-                <svg class="w-5 h-5 nav-icon text-slate-400 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                </svg>
-                <span class="text-sm font-medium">តាមដានសម្ពាធទឹក (PSMD)</span>
-              </div>
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-600">LIVE</span>
-            </button>
-
-            <!-- Chemical Dosing Mixing Log -->
-            <button data-target="chemicals" data-title="កត់ត្រាសារធាតុគីមី (Chemicals)" class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-slate-600 hover:text-indigo-600 hover:bg-white/80 transition-all group">
-              <div class="flex items-center gap-3">
-                <svg class="w-5 h-5 nav-icon text-slate-400 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
-                </svg>
-                <span class="text-sm font-medium">កត់ត្រាសារធាតុគីមី (Chemicals)</span>
-              </div>
-            </button>
-
-            <!-- Plant Production Reports -->
-            <button data-target="reports" data-title="របាយការណ៍ផលិតកម្មប្រចាំថ្ងៃ" class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-slate-600 hover:text-indigo-600 hover:bg-white/80 transition-all group">
-              <div class="flex items-center gap-3">
-                <svg class="w-5 h-5 nav-icon text-slate-400 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <span class="text-sm font-medium">របាយការណ៍ផលិតកម្មប្រចាំថ្ងៃ</span>
-              </div>
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-100 text-indigo-600">7 រោងចក្រ</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- ផ្នែកទី ៣៖ ការងារ និងបុគ្គលិក -->
-        <div>
-          <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">ការងារ និងបុគ្គលិក</p>
-          <div class="space-y-1">
-            <!-- PRD Task Tracker -->
-            <button data-target="tasks" data-title="កិច្ចការ និងតាមដាន (Tasks)" class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-slate-600 hover:text-indigo-600 hover:bg-white/80 transition-all group">
-              <div class="flex items-center gap-3">
-                <svg class="w-5 h-5 nav-icon text-slate-400 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                </svg>
-                <span class="text-sm font-medium">កិច្ចការ និងតាមដាន (Tasks)</span>
-              </div>
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-100 text-rose-600">3 ថ្មី</span>
-            </button>
-
-            <!-- PRD Calendar & Shift Scheduler -->
-            <button data-target="calendar" data-title="កាលវិភាគប្តូរវេន (Calendar)" class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-slate-600 hover:text-indigo-600 hover:bg-white/80 transition-all group">
-              <div class="flex items-center gap-3">
-                <svg class="w-5 h-5 nav-icon text-slate-400 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <span class="text-sm font-medium">កាលវិភាគប្តូរវេន (Calendar)</span>
-              </div>
-            </button>
-
-            <!-- HR / Staff List -->
-            <button data-target="hr" data-title="បុគ្គលិក និងរដ្ឋបាល (HR)" class="nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-slate-600 hover:text-indigo-600 hover:bg-white/80 transition-all group">
-              <div class="flex items-center gap-3">
-                <svg class="w-5 h-5 nav-icon text-slate-400 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                </svg>
-                <span class="text-sm font-medium">បុគ្គលិក និងរដ្ឋបាល (HR)</span>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <!-- ផ្នែកទី ៤៖ ប្រព័ន្ធ -->
-        <div class="pt-2 border-t border-slate-200/60">
-          <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">ប្រព័ន្ធ</p>
-          <button data-target="settings" data-title="ការកំណត់ប្រព័ន្ធ (Settings)" class="nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:text-indigo-600 hover:bg-white/80 transition-all group">
-            <svg class="w-5 h-5 nav-icon text-slate-400 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-            <span class="text-sm font-medium">ការកំណត់ប្រព័ន្ធ (Settings)</span>
-          </button>
-        </div>
-
-      </nav>
+      <button class="side-toggle-btn" id="desktopCollapseBtn" title="បង្រួម / ពង្រីក Sidebar">❮</button>
     </div>
 
-    <!-- Bottom User Profile Card -->
-    <div class="p-4 border-t border-slate-200/60 bg-white/40 rounded-br-3xl">
-      <div class="flex items-center justify-between p-3 rounded-2xl bg-white/95 shadow-xs border border-slate-100">
-        <div class="flex items-center gap-3">
-          <div class="relative">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center font-bold text-white text-sm shadow-xs">
-              SC
-            </div>
-            <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white"></span>
-          </div>
-          <div>
-            <p class="text-sm font-bold text-slate-800">សោម ច័ន្ទសំណាង</p>
-            <p class="text-[11px] text-slate-500">អ្នកគ្រប់គ្រងប្រព័ន្ធ</p>
-          </div>
-        </div>
-        
-        <button onclick="alert('ចាកចេញពីប្រព័ន្ធ!')" class="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors" title="ចាកចេញ">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-          </svg>
-        </button>
+    <div class="navlabel">WORKSPACE</div>
+    <nav class="nav">
+      <button class="active" data-page="overview"><span class="nav-icon">◈</span><span class="nav-text">Overview</span></button>
+      <button data-page="water"><span class="nav-icon">◉</span><span class="nav-text">Water Quality</span></button>
+      <button data-page="chemical"><span class="nav-icon">⚗</span><span class="nav-text">Chemical Dosing</span></button>
+      <button data-page="records"><span class="nav-icon">▤</span><span class="nav-text">Daily Records</span></button>
+      <button data-page="network"><span class="nav-icon">⌘</span><span class="nav-text">Plant Network</span></button>
+      <button data-page="datacenter"><span class="nav-icon">⇅</span><span class="nav-text">Data Center</span></button>
+      <button data-page="governance"><span class="nav-icon">⚙</span><span class="nav-text">Criteria & Governance</span></button>
+    </nav>
+
+    <div class="sidefoot">
+      <div class="sidefoot-card">
+        <div class="live-pill"><i></i> 9 WTP NETWORK</div>
+        <div>Multi-Plant Water Quality Analytics Workspace</div>
       </div>
     </div>
-
   </aside>
 
-  <script>
-    const sidebar = document.getElementById('mobileSidebar');
-    const backdrop = document.getElementById('sidebarBackdrop');
-    const openBtn = document.getElementById('openSidebar');
-    const closeBtn = document.getElementById('closeSidebar');
-    const edgeZone = document.getElementById('edgeSwipeZone');
-    const navItems = document.querySelectorAll('.nav-item');
-    const headerTitle = document.getElementById('headerTitle');
-    const pageDashboard = document.getElementById('page-dashboard');
-    const pageDynamic = document.getElementById('page-dynamic');
-    const dynamicPageTitle = document.getElementById('dynamicPageTitle');
+  <!-- Main Workspace -->
+  <main>
+    <header class="top">
+      <div>
+        <div class="eyebrow">PRD-WATER / SKY GLASS V2 PREMIUM</div>
+        <h1 id="pageTitle">Overview Dashboard</h1>
+      </div>
+      <div class="controls">
+        <select id="plantSelect" class="select" aria-label="Select plant">
+          <option value="ALL">All Plants · គ្រប់រោងចក្រ</option>
+          <option value="BKG">BKG WTP · បាក់ខែង</option>
+          <option value="PPR">PPR WTP · ភូមិព្រែក</option>
+          <option value="CCW">CCW WTP · ជ្រោយចង្វារ</option>
+          <option value="NR">NR WTP · និរោធ</option>
+          <option value="CCM">CCM WTP · ចំការមន</option>
+          <option value="BTH">BTH WTP · បឹងធំ</option>
+          <option value="MLE">MLE WTP · ម្លេច</option>
+          <option value="TBK">TBK WTP · ត្បូងឃ្មុំ</option>
+          <option value="TKM">TKM WTP · តាខ្មៅ</option>
+        </select>
+        <select id="year" class="select">
+          <option>2026</option><option>2025</option><option>2024</option><option>2023</option>
+        </select>
+        <select id="month" class="select">
+          <option value="0">All months</option>
+          <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+          <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+          <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+          <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+        </select>
+        <button class="action" onclick="window.print()">⇩ Export PDF</button>
+      </div>
+    </header>
 
-    const SIDEBAR_WIDTH = 295;
-    let isOpen = false;
-    let startX = 0;
-    let currentX = 0;
-    let isDragging = false;
+    <!-- Sections (Overview, Water Quality, etc.) -->
+    <section id="overview" class="section active">
+      <div class="note" id="overviewDataNote" style="margin:0 0 15px">All Plants selected · 1 of 9 plants currently has source data connected.</div>
+      <div class="grid kpis" id="kpis"></div>
+      <div class="grid charts">
+        <div class="card"><div class="cardtitle">Water Quality Performance</div><div class="carddesc">Daily treated-water readings · selected period</div><div class="chartbox"><canvas id="qualityChart"></canvas></div></div>
+        <div class="card"><div class="cardtitle">Average Parameter Snapshot</div><div class="carddesc">Selected year · treated water</div><div class="chartbox"><canvas id="radarChart"></canvas></div></div>
+      </div>
+    </section>
 
-    // 1. មុខងារបើក និងបិទ Sidebar
-    function toggleSidebar(show) {
-      isOpen = show;
-      sidebar.style.transition = 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)';
-      backdrop.style.transition = 'opacity 0.3s ease';
-      
-      if (show) {
-        sidebar.style.transform = 'translateX(0px)';
-        backdrop.classList.remove('opacity-0', 'pointer-events-none');
-        backdrop.style.opacity = '1';
-      } else {
-        sidebar.style.transform = `translateX(-${SIDEBAR_WIDTH}px)`;
-        backdrop.classList.add('opacity-0', 'pointer-events-none');
-        backdrop.style.opacity = '0';
-      }
-    }
+    <section id="water" class="section">
+      <div class="pagehead"><div><h2>Water Quality Monitoring</h2><p>Raw water versus treated water · Daily and monthly trends</p></div></div>
+      <div class="grid kpis" id="waterKpis"></div>
+      <div class="grid charts equal">
+        <div class="card"><div class="cardtitle">Turbidity · Raw vs Treated</div><div class="chartbox"><canvas id="turbChart"></canvas></div></div>
+        <div class="card"><div class="cardtitle">pH · Raw vs Treated</div><div class="chartbox"><canvas id="phChart"></canvas></div></div>
+      </div>
+    </section>
 
-    openBtn.addEventListener('click', () => toggleSidebar(true));
-    closeBtn.addEventListener('click', () => toggleSidebar(false));
-    backdrop.addEventListener('click', () => toggleSidebar(false));
+    <section id="chemical" class="section"><div class="pagehead"><h2>Chemical Dosing Analytics</h2></div></section>
+    <section id="records" class="section"><div class="pagehead"><h2>Daily Water Quality Records</h2></div></section>
+    <section id="network" class="section"><div class="pagehead"><h2>Water Treatment Plant Network</h2></div></section>
+    <section id="datacenter" class="section"><div class="pagehead"><h2>Data Center & Records Management</h2></div></section>
+    <section id="governance" class="section"><div class="pagehead"><h2>Criteria & Governance</h2></div></section>
+  </main>
+</div>
 
-    // 2. មុខងារចុចជ្រើសរើសម៉ឺនុយ (Active State & Page Switch)
-    navItems.forEach(item => {
-      item.addEventListener('click', () => {
-        // ដកពណ៌ Active ចេញពីម៉ឺនុយទាំងអស់
-        navItems.forEach(nav => {
-          nav.classList.remove('bg-gradient-to-r', 'from-indigo-600', 'to-blue-600', 'text-white', 'shadow-md', 'shadow-indigo-500/25');
-          nav.classList.add('text-slate-600', 'hover:text-indigo-600', 'hover:bg-white/80');
-          const icon = nav.querySelector('.nav-icon');
-          if (icon) {
-            icon.classList.remove('text-white');
-            icon.classList.add('text-slate-400', 'group-hover:text-indigo-600');
-          }
-        });
-
-        // បន្ថែមពណ៌ Active លើម៉ឺនុយដែលបានចុច
-        item.classList.remove('text-slate-600', 'hover:text-indigo-600', 'hover:bg-white/80');
-        item.classList.add('bg-gradient-to-r', 'from-indigo-600', 'to-blue-600', 'text-white', 'shadow-md', 'shadow-indigo-500/25');
-        const activeIcon = item.querySelector('.nav-icon');
-        if (activeIcon) {
-          activeIcon.classList.remove('text-slate-400', 'group-hover:text-indigo-600');
-          activeIcon.classList.add('text-white');
-        }
-
-        // ប្តូរចំណងជើង និងផ្ទាំងមាតិកា
-        const target = item.getAttribute('data-target');
-        const title = item.getAttribute('data-title');
-        headerTitle.textContent = title;
-
-        if (target === 'dashboard') {
-          pageDashboard.classList.remove('hidden');
-          pageDynamic.classList.add('hidden');
-        } else {
-          pageDashboard.classList.add('hidden');
-          pageDynamic.classList.remove('hidden');
-          dynamicPageTitle.textContent = title;
-        }
-
-        // បិទ Sidebar វិញដោយស្វ័យប្រវត្តិ
-        toggleSidebar(false);
-      });
+<script>
+(function() {
+  // Navigation Routing Logic
+  const titles = { overview:'Overview Dashboard', water:'Water Quality Monitoring', chemical:'Chemical Dosing Analytics', records:'Daily Water Quality Records', network:'Plant Network', datacenter:'Data Center & Records Management', governance:'Criteria & Governance' };
+  
+  document.querySelectorAll('.nav button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.nav button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
+      const target = $(b.dataset.page);
+      if (target) target.classList.add('active');
+      const pageTitle = $('pageTitle');
+      if (pageTitle) pageTitle.textContent = titles[b.dataset.page] || 'Dashboard';
     });
+  });
 
-    // 3. មុខងារអូសពីគែមឆ្វេងដើម្បីបើក (Edge Swipe Open)
-    edgeZone.addEventListener('touchstart', (e) => {
-      startX = e.touches[0].clientX;
-      isDragging = true;
-      sidebar.style.transition = 'none';
-      backdrop.style.transition = 'none';
-      backdrop.classList.remove('pointer-events-none');
-    }, { passive: true });
+  const $ = id => document.getElementById(id);
+  const app = document.querySelector('.app');
+  const sidebar = document.getElementById('appSidebar');
+  const backdrop = document.getElementById('sideBackdrop');
+  const mobileBtn = document.getElementById('mobileMenuBtn');
+  const collapseBtn = document.getElementById('desktopCollapseBtn');
 
-    edgeZone.addEventListener('touchmove', (e) => {
-      if (!isDragging) return;
-      currentX = e.touches[0].clientX;
-      let diff = Math.min(Math.max(currentX - startX, 0), SIDEBAR_WIDTH);
-      sidebar.style.transform = `translateX(${diff - SIDEBAR_WIDTH}px)`;
-      backdrop.style.opacity = (diff / SIDEBAR_WIDTH).toFixed(2);
-    }, { passive: true });
-
-    edgeZone.addEventListener('touchend', () => {
-      if (!isDragging) return;
-      isDragging = false;
-      let diff = currentX - startX;
-      toggleSidebar(diff > SIDEBAR_WIDTH * 0.3);
+  // Desktop Sidebar Collapse Toggle
+  if (collapseBtn && app) {
+    collapseBtn.addEventListener('click', () => {
+      app.classList.toggle('collapsed');
+      collapseBtn.textContent = app.classList.contains('collapsed') ? '❯' : '❮';
+      setTimeout(() => window.dispatchEvent(new Event('resize')), 360);
     });
+  }
 
-    // 4. មុខងារអូសបិទ (Swipe Close)
-    [sidebar, backdrop].forEach(el => {
-      el.addEventListener('touchstart', (e) => {
-        if (!isOpen) return;
-        startX = e.touches[0].clientX;
-        isDragging = true;
-        sidebar.style.transition = 'none';
-        backdrop.style.transition = 'none';
-      }, { passive: true });
+  // Mobile Drawer Toggle
+  function toggleMobileMenu(forceClose = false) {
+    if (!sidebar || !backdrop) return;
+    const isOpen = forceClose ? false : !sidebar.classList.contains('open');
+    sidebar.classList.toggle('open', isOpen);
+    backdrop.classList.toggle('show', isOpen);
+  }
 
-      el.addEventListener('touchmove', (e) => {
-        if (!isDragging || !isOpen) return;
-        currentX = e.touches[0].clientX;
-        let diff = Math.min(Math.max(currentX - startX, -SIDEBAR_WIDTH), 0);
-        sidebar.style.transform = `translateX(${diff}px)`;
-        backdrop.style.opacity = (1 + diff / SIDEBAR_WIDTH).toFixed(2);
-      }, { passive: true });
+  if (mobileBtn) mobileBtn.addEventListener('click', () => toggleMobileMenu());
+  if (backdrop) backdrop.addEventListener('click', () => toggleMobileMenu(true));
 
-      el.addEventListener('touchend', () => {
-        if (!isDragging || !isOpen) return;
-        isDragging = false;
-        let diff = currentX - startX;
-        toggleSidebar(diff > -SIDEBAR_WIDTH * 0.25);
-      });
+  document.querySelectorAll('.nav button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (window.innerWidth <= 860) toggleMobileMenu(true);
     });
-  </script>
+  });
+})();
+</script>
 </body>
 </html>
