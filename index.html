@@ -486,4 +486,89 @@ renderAll();
 })();
 </script>
 
+
+<style id="premium-sidebar-enhancement">
+/* Premium responsive sidebar — isolated navigation enhancement */
+:root{--sidebar-wide:272px;--sidebar-mini:84px}
+.app{grid-template-columns:var(--sidebar-wide) minmax(0,1fr);transition:grid-template-columns .28s ease}
+.side{z-index:100;box-sizing:border-box;width:var(--sidebar-wide);min-width:0;overflow-x:hidden;transition:width .28s ease,transform .28s ease,padding .28s ease;border-right:1px solid rgba(224,246,255,.3)}
+.side .brand{min-width:0}
+.side .brand b,.side .brand small,.side .navlabel,.side .nav button .navtext,.side .sidefoot{transition:opacity .18s ease}
+.side .nav{display:flex;flex-direction:column;gap:5px}
+.side .nav button{display:flex;align-items:center;gap:12px;min-height:48px;padding:11px 14px;text-align:left;border:1px solid transparent;border-radius:14px;font-weight:550}
+.side .nav button span{flex:0 0 27px;width:27px;text-align:center;font-size:17px}
+.side .nav button.active{border-color:rgba(185,242,255,.28);box-shadow:inset 3px 0 0 #9beeff,0 8px 22px rgba(0,48,105,.16)}
+.sidebar-toggle{display:inline-grid;place-items:center;flex:0 0 42px;width:42px;height:42px;margin-right:12px;border:1px solid rgba(224,246,255,.36);border-radius:13px;background:rgba(5,52,105,.48);color:#fff;font-size:20px;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:.2s}
+.sidebar-toggle:hover{border-color:#a8f0ff;box-shadow:0 0 20px #65dfff44}
+.top-heading{display:flex;align-items:center;min-width:0}
+.app.sidebar-collapsed{grid-template-columns:var(--sidebar-mini) minmax(0,1fr)}
+.app.sidebar-collapsed .side{width:var(--sidebar-mini);padding-left:14px;padding-right:14px}
+.app.sidebar-collapsed .brand{justify-content:center;margin-left:0;margin-right:0}
+.app.sidebar-collapsed .brand>div:last-child,.app.sidebar-collapsed .navlabel,.app.sidebar-collapsed .navtext,.app.sidebar-collapsed .sidefoot{display:none}
+.app.sidebar-collapsed .nav button{justify-content:center;padding:11px 8px}
+.app.sidebar-collapsed .nav button span{flex-basis:auto;width:auto;margin:0;font-size:20px}
+.app.sidebar-collapsed .nav button.active{box-shadow:inset 0 0 0 1px rgba(213,246,255,.42),0 5px 22px #003b7860}
+.sidebar-overlay{display:none}
+@media(max-width:700px){
+ .app,.app.sidebar-collapsed{display:block;min-height:100vh}
+ .side,.app.sidebar-collapsed .side{position:fixed;inset:0 auto 0 0;width:min( min(84vw,310px),310px);height:100dvh;max-height:100dvh;padding:22px 17px calc(22px + env(safe-area-inset-bottom));overflow-y:auto;overflow-x:hidden;transform:translateX(-105%);border-right:1px solid rgba(224,246,255,.32);border-bottom:0;border-radius:0 22px 22px 0;box-shadow:20px 0 60px rgba(0,20,55,.35);background:rgba(4,36,76,.94);backdrop-filter:blur(26px) saturate(150%);-webkit-backdrop-filter:blur(26px) saturate(150%);z-index:1002}
+ .app.mobile-menu-open .side{transform:translateX(0)}
+ .side .brand,.app.sidebar-collapsed .side .brand{justify-content:flex-start;margin:0 8px 28px}
+ .side .brand>div:last-child,.app.sidebar-collapsed .side .brand>div:last-child{display:block}
+ .side .navlabel,.app.sidebar-collapsed .side .navlabel{display:block;margin:20px 10px 10px}
+ .side .nav,.app.sidebar-collapsed .side .nav{display:flex;flex-direction:column;overflow:visible;gap:5px}
+ .side .nav button,.app.sidebar-collapsed .side .nav button{width:100%;min-height:50px;white-space:normal;justify-content:flex-start;padding:12px 14px;margin:0;font-size:14px}
+ .side .nav button span,.app.sidebar-collapsed .side .nav button span{flex:0 0 27px;width:27px;margin:0;text-align:center;font-size:18px}
+ .side .navtext,.app.sidebar-collapsed .side .navtext{display:inline!important}
+ .side .sidefoot,.app.sidebar-collapsed .side .sidefoot{display:block;position:static;margin:30px 8px 0}
+ .sidebar-overlay{display:block;position:fixed;inset:0;background:rgba(0,15,38,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:.25s;z-index:1001}
+ .app.mobile-menu-open .sidebar-overlay{opacity:1;visibility:visible}
+ .top{gap:12px}
+ .top-heading{width:100%}
+ .sidebar-toggle{margin-right:10px;flex:0 0 40px;width:40px;height:40px}
+}
+@media(min-width:701px) and (max-width:1050px){.app{grid-template-columns:var(--sidebar-mini) minmax(0,1fr)}.side{width:var(--sidebar-mini);padding-left:14px;padding-right:14px}.side .brand{justify-content:center;margin-left:0;margin-right:0}.side .brand>div:last-child,.side .navlabel,.side .navtext,.side .sidefoot{display:none}.side .nav button{justify-content:center;padding:11px 8px}.side .nav button span{flex-basis:auto;width:auto;margin:0;font-size:20px}}
+@media(prefers-reduced-motion:reduce){.app,.side,.sidebar-overlay,.sidebar-toggle{transition:none!important}}
+@media print{.sidebar-toggle,.sidebar-overlay{display:none!important}.side{display:none!important}.app,.app.sidebar-collapsed{display:block!important}}
+</style>
+<script id="premium-sidebar-controller">
+(function(){
+ const app=document.querySelector('.app'), side=document.querySelector('.side'), top=document.querySelector('.top');
+ if(!app||!side||!top||document.getElementById('sidebarToggle'))return;
+ // Keep original navigation labels and destinations; only wrap their visible text.
+ side.querySelectorAll('.nav button').forEach(btn=>{
+   const icon=btn.querySelector('span');
+   if(icon && !btn.querySelector('.navtext')){
+     const label=[...btn.childNodes].filter(n=>n!==icon).map(n=>n.textContent).join('').trim();
+     [...btn.childNodes].filter(n=>n!==icon).forEach(n=>n.remove());
+     const text=document.createElement('span');text.className='navtext';text.textContent=label;btn.appendChild(text);
+   }
+ });
+ const heading=top.querySelector(':scope > div');
+ if(heading)heading.classList.add('top-heading');
+ const toggle=document.createElement('button');
+ toggle.type='button';toggle.id='sidebarToggle';toggle.className='sidebar-toggle';
+ toggle.setAttribute('aria-label','Open navigation menu');toggle.setAttribute('aria-expanded','false');
+ toggle.innerHTML='<span aria-hidden="true">☰</span>';
+ if(heading)heading.insertBefore(toggle,heading.firstChild);else top.insertBefore(toggle,top.firstChild);
+ const overlay=document.createElement('div');overlay.className='sidebar-overlay';overlay.setAttribute('aria-hidden','true');app.appendChild(overlay);
+ const mobile=()=>window.matchMedia('(max-width:700px)').matches;
+ function setOpen(open){
+   app.classList.toggle('mobile-menu-open',open);
+   toggle.setAttribute('aria-expanded',String(open));
+   toggle.setAttribute('aria-label',open?'Close navigation menu':'Open navigation menu');
+   toggle.innerHTML='<span aria-hidden="true">'+(open?'×':'☰')+'</span>';
+   document.body.style.overflow=mobile()&&open?'hidden':'';
+ }
+ toggle.addEventListener('click',()=>{
+   if(mobile())setOpen(!app.classList.contains('mobile-menu-open'));
+   else app.classList.toggle('sidebar-collapsed');
+ });
+ overlay.addEventListener('click',()=>setOpen(false));
+ side.querySelectorAll('.nav button').forEach(btn=>btn.addEventListener('click',()=>{if(mobile())setOpen(false)}));
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&app.classList.contains('mobile-menu-open'))setOpen(false)});
+ window.addEventListener('resize',()=>{if(!mobile())setOpen(false)});
+})();
+</script>
+
 </body></html>
