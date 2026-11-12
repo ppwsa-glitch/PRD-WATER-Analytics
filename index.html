@@ -299,3 +299,51 @@ renderAll();
 })();
 </script>
 </body></html>
+<script>
+/* Demo Patch: បើកដំណើរការបង្ហាញទិន្ន័យរោងចក្រទាំង ៩ ដែលមានស្រាប់ក្នុង DATA.daily */
+(function() {
+  // ១. ធ្វើបច្ចុប្បន្នភាពស្ថានភាពរោងចក្រទាំង ៩ ក្នុង Plant Network
+  PLANTS.forEach(p => {
+    const count = DATA.daily.filter(x => (x.plant || 'BKG') === p.code).length;
+    p.hasData = count > 0;
+  });
+
+  // ២. កែសម្រួលផ្ទាំង Water Quality Monitoring ឱ្យបង្ហាញក្រាហ្វិកទឹកស្អាតសម្រាប់គ្រប់រោងចក្រ
+  const origRenderWater = renderWater;
+  renderWater = function() {
+    origRenderWater();
+    const r = rows();
+    const labels = r.map(x => x.date.slice(5));
+    const hasRaw = r.some(x => x.rawTurb !== null || x.rawPH !== null);
+    const tk2 = { color: '#7897b0' };
+
+    // បើគ្មានទិន្ន័យទឹកឆៅ (រោងចក្រក្រៅពី BKG) ឱ្យបង្ហាញតែខ្សែក្រាហ្វិកទឹកស្អាត
+    if (!hasRaw && currentPlant !== 'ALL') {
+      chart('turbChart', 'line', labels, [
+        { label: 'Treated turbidity (NTU)', data: r.map(x => x.treatedTurb), color: COLORS[0], fill: true }
+      ]);
+      chart('phChart', 'line', labels, [
+        { label: 'Treated pH', data: r.map(x => x.treatedPH), color: COLORS[0], fill: true }
+      ]);
+      chart('facChart', 'line', labels, [
+        { label: 'Treated FAC (mg/L)', data: r.map(x => x.treatedFAC), color: COLORS[0], fill: true }
+      ]);
+    }
+  };
+
+  // ៣. បង្ហាញសារជូនដំណឹងច្បាស់លាស់នៅផ្ទាំង Overview និង Chemical
+  const origRenderAll = renderAll;
+  renderAll = function() {
+    origRenderAll();
+    const r = rows();
+    const hasRaw = r.some(x => x.rawTurb !== null || x.rawPH !== null);
+    const note = $('overviewDataNote');
+    if (note && currentPlant !== 'ALL' && !hasRaw) {
+      note.innerHTML = `<strong>${currentPlant} WTP:</strong> កំពុងបង្ហាញទិន្ន័យគុណភាពទឹកស្អាត (pH, Turbidity, FAC) ចំនួន <b>${r.length}</b> ថ្ងៃពីឯកសារ KPI_WQ_2024-2025.xls។ <i>(ទិន្ន័យទឹកឆៅ និងសារធាតុគីមីមិនទាន់មានសម្រាប់រោងចក្រនេះទេ)</i>`;
+    }
+  };
+
+  // ដំណើរការផ្ទាំង Dashboard ឡើងវិញភ្លាមៗ
+  renderAll();
+})();
+</script>
